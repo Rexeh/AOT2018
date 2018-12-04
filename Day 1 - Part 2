@@ -979,13 +979,11 @@ while(matched != true){
  for(value <- myList) {
 
    summed += value
-
+  // Will carry on for one iteration when match is found > Future fix
    if(emptyMap.contains(summed) && matched == false){
-    //Executes when the Boolean expression is true
     matched = true
     matchval = summed
     } else{
- //Executes when the Boolean expression is false
      emptyMap += (summed -> summed)
     }
 
