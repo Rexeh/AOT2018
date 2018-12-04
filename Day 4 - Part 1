@@ -1,11 +1,12 @@
-object Main extends App {
+import scala.util.matching.Regex
 import scala.collection.mutable.HashMap
-import scala.collection.mutable.ArrayBuffer
 
-val myList = ArrayBuffer(
-"[1518-11-01 00:00] Guard #10 begins shift",
+object Main extends App {
+
+var actions = List(
+ "[1518-11-01 00:00] Guard #10 begins shift",
 "[1518-11-01 00:05] falls asleep",
-"[1518-11-01 00:25] wakes up",
+"1518-11-01 00:25] wakes up",
 "[1518-11-01 00:30] falls asleep",
 "[1518-11-01 00:55] wakes up",
 "[1518-11-01 23:58] Guard #99 begins shift",
@@ -20,19 +21,103 @@ val myList = ArrayBuffer(
 "[1518-11-05 00:03] Guard #99 begins shift",
 "[1518-11-05 00:45] falls asleep",
 "[1518-11-05 00:55] wakes up"
-)
 
-var row = myList(0)
-var map = Map()
 
-for(activity <- myList) {
-  var splitStr = activity.split("]").toList
+ ).sortWith(sortByDateTime)
 
-  var time = splitStr(0).replace("[","")
-  var action = splitStr(1).trim
 
+def sortByDateTime(s1: String, s2: String) = {
+   val datePattern = new Regex("\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d")
+   var dateStr1 = datePattern.findFirstIn(s1).mkString(",")
+   var dateStr2 = datePattern.findFirstIn(s2).mkString(",")
+   dateStr1 < dateStr2
 }
 
-println(myList)
+/*
+ val guardPattern = new Regex("#\\d+ ")
+ val actionPattern = new Regex("\\d [\\w\\s]+\\Z")
 
-}
+ var actionStr = actionPattern.findFirstIn(input).mkString(",").drop(2)
+
+*/
+
+val maxSleep: HashMap[String,Int] = HashMap.empty[String,Int]
+val maxMinute: HashMap[String,Int] = HashMap.empty[String,Int]
+val userMinuteMap: HashMap[String,Int] = HashMap.empty[String,Int]
+var guardStr: String = "";
+var startSleepMinutes: Int = 0;
+var endSleepMinutes: Int = 0;
+
+for(action <- actions) {
+
+
+ if (action.contains("Guard")) {
+   val guardPattern = new Regex("#\\d+ ")
+   guardStr = guardPattern.findFirstIn(action).mkString(",").replace("#", "").replace(" ", "")
+ }
+
+ val datePattern = new Regex("\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d")
+ var dateStr = datePattern.findFirstIn(action).mkString(",")
+ var minutes = dateStr.drop(14).toInt;
+
+ if (action.contains("falls asleep")) {
+   startSleepMinutes = dateStr.drop(14).toInt
+   println(s"User: $guardStr Fell asleep at: $startSleepMinutes")
+ }
+
+ if (action.contains("wakes up")) {
+   endSleepMinutes = dateStr.drop(14).toInt
+   var sleepDuration =  endSleepMinutes - startSleepMinutes;
+
+   // POpulate Minute Map for user
+
+   println(s"Start Sleep is:$startSleepMinutes and Duration is: $sleepDuration")
+   for(i <- startSleepMinutes to startSleepMinutes+sleepDuration) {
+
+     var key = guardStr + "-" + i
+     println(key)
+
+     if(userMinuteMap.contains(key)) {
+       userMinuteMap(key) = userMinuteMap(key)+1
+     } else {
+       userMinuteMap+= (key -> 1)
+     }
+
+   }
+
+   println(s"User: $guardStr Woke up at: $endSleepMinutes")
+
+   	if(!maxSleep.contains(guardStr)) {
+			maxSleep += (guardStr -> sleepDuration)
+			maxMinute += (guardStr -> startSleepMinutes)
+	} else {
+
+		if(maxSleep(guardStr) <= sleepDuration) {
+			maxSleep(guardStr) = sleepDuration
+			maxMinute(guardStr) = startSleepMinutes
+		}
+
+	}
+
+   println(s"Guard [$guardStr] slept for [$sleepDuration] minutes")
+
+ }
+
+ }
+
+	println("Max Sleep Time")
+	for(person <- maxSleep) {
+		println(person)
+	}
+
+	println("Minute they had longest sleep")
+   for(person <- maxMinute) {
+		println(person)
+	}
+
+  println("Longest Minutes")
+   for(person <- userMinuteMap) {
+		println(person)
+	}
+
+ }
