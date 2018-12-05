@@ -1,0 +1,67 @@
+import scala.util.matching.Regex
+import scala.collection.mutable.HashMap
+import scala.collection.mutable.ArrayBuffer
+
+
+object Main extends App {
+
+var charStr = "dabAcCaCBAcCcaDA"
+var result = "dabCBAcaDA"
+
+var buildStr = ""
+var strPos = 0
+var seek = 1
+var strLength = charStr.length
+
+for (i <- strPos to strLength-1) {
+
+	if(buildStr.length>0) {
+
+		// IF CHARS ARE SAME
+		if(charStr(i).toLower == (buildStr(buildStr.length-1).toLower)) {
+
+			if(charStr(i) != buildStr(buildStr.length-1)) {
+					buildStr = buildStr.substring(0, buildStr.length - 1)
+
+			} else {
+
+				if(buildStr.length>2) {
+					if(charStr(i) == buildStr(buildStr.length-1) && charStr(i) != buildStr(buildStr.length-2)) {
+							buildStr += charStr(i)
+
+					}
+				}
+
+			}
+
+
+		} else {
+
+
+			if(charStr(i).toLower != buildStr(buildStr.length-1).toLower) {
+
+				buildStr += charStr(i)
+			}
+
+		}
+
+	} else {
+
+		buildStr += charStr(i)
+
+	}
+
+	//println(s"Built String is: $buildStr")
+}
+
+println(buildStr.length)
+
+println(s"Built String is: $buildStr")
+
+if(result == buildStr){
+	println("Success")
+} else {
+	println("Fail")
+}
+
+}
